@@ -1,18 +1,25 @@
 import scrapy
 from findtrip.items import FindtripItem
+from scrapy import log
 
 class CtripSpider(scrapy.Spider):
     name = 'Ctrip'
     start_urls = [
-            "http://flights.ctrip.com/booking/XMN-BJS-day-1.html?DDate1=2016-04-19"
+            "https://flights.ctrip.com/international/search/oneway-bjs-puq?depdate=2020-10-01"
             ]
 
     def parse(self, response):
         sel = scrapy.Selector(response)
-        fligint_div = "//div[@id='J_flightlist2']/div"
-        dataList = sel.xpath(fligint_div)
-        print dataList,len(dataList)
+        fligint_div = "//div[@class='flight-item']"
+        dataList = sel.xpath(fligint_div).extract()
+        log.msg(">>>>>> Get %s flight html items" % len(dataList), level=log.DEBUG)
 
+        for i in range(len(dataList)):
+            filename = response.url.split("/")[-2] + str(i) + '.html'
+            with open(filename, 'wb') as f:
+                f.write(dataList[i].encode('utf-8').strip())
+
+        '''
         items = []
         for index,each in enumerate(dataList):
             flight_each = fligint_div+'['+str(index+1)+']'
@@ -50,3 +57,4 @@ class CtripSpider(scrapy.Spider):
                 items.append(item)
 
         return items
+        '''
